@@ -5,13 +5,14 @@
     height: 100vh; /* Full viewport height */
 }
 
+
 .centered-container div {
     font-size: 1.8rem;
     font-family: 'Quicksand', 'Open Sans', sans-serif;
     font-weight: 300; /* Light weight for gentle appearance */
     text-align: center;
-    padding: 20px;
-    border-radius: 10px;
+    padding: 20%;
+    border-color: white;
     line-height: 1.8; /* More breathing room between lines */
     letter-spacing: 0.03em; /* Slightly increased spacing for softness */
 }

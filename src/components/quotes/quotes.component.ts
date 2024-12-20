@@ -1,5 +1,13 @@
+import { CommonModule } from '@angular/common';
+import { minidenticon } from 'minidenticons';
+
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Component, signal } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+
+import * as htmlToImage from 'html-to-image';
+import { toPng, toJpeg, toBlob, toPixelData, toSvg } from 'html-to-image';
+import { timeout } from 'rxjs';
 
 const lightColors = [
   "#F5FFFA", // Mint Cream
@@ -27,19 +35,69 @@ const lightColors = [
 
 @Component({
   selector: 'app-quotes',
-  imports: [HttpClientModule],
+  imports: [HttpClientModule, CommonModule],
   templateUrl: './quotes.component.html',
   styleUrl: './quotes.component.css'
 })
 
 export class QuotesComponent {
+
+  quoteList: any = [];
+  isVisible = signal<boolean>(false);
+  isEnabled = signal<boolean>(false);
   quote = signal<string>("");
   color = signal<string>("");
-  constructor(http: HttpClient){
-    http.get('https://cors-anywhere.herokuapp.com/https://zenquotes.io/api/random').subscribe((data: any) => {
-      this.quote.set(data[0].q.toUpperCase());
-      this.color.set("background: " + lightColors[Math.floor(Math.random() * lightColors.length)]);
-    });
+
+  constructor(private http: HttpClient){
+    this.getQuote();
   }
 
+  //gets quote to display from quotelist and then deletes the quote from quotelist
+  getQuote() {
+    this.isEnabled.set(false);
+
+    if (this.quoteList.length == 0) {
+      this.getQuoteList();
+    }
+    else {
+      const quote = this.quoteList[0].q.toUpperCase();
+      this.quoteList.shift();
+      this.quote.set(quote);
+      localStorage.setItem('quoteList', JSON.stringify(this.quoteList));
+      this.color.set("background: " + lightColors[Math.floor(Math.random() * lightColors.length)]);
+      this.isVisible.set(true);
+      this.isEnabled.set(true);
+    }
+  }
+
+  downloadQuote(){
+    const element = document.getElementById('quote-dialog');
+    if (element) {
+      htmlToImage.toPng(element)
+        .then((dataUrl: string) => {
+          const link = document.createElement('a');
+          link.download = 'betterin-quote-' + Math.floor(Math.random() * 1000000000) + '.png';
+          link.href = dataUrl;
+          link.click();
+        });
+    }
+  }
+
+  getQuoteList() {
+    const quoteList = localStorage.getItem('quoteList');
+    this.quoteList = quoteList ? JSON.parse(quoteList) : [];
+    if (this.quoteList.length > 0 && this.quoteList[0].length > 0) {
+      this.getQuote();
+    }
+    else {
+      this.http.get('https://cors-anywhere.herokuapp.com/https://zenquotes.io/api/quotes').subscribe((data: any) => {
+        this.quoteList = data;
+
+        localStorage.setItem('quoteList', JSON.stringify(this.quoteList));
+        this.getQuote();
+        this.isVisible.set(true);
+      });
+    }
+  }
 }
+

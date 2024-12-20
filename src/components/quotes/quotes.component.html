@@ -1,4 +1,13 @@
-<div [style]="color()" class="centered-container">
-    <div>{{quote()}}</div>
+<div class="d-flex vh-100">
+  <div id="quote-dialog" class="col-10 d-flex align-items-center justify-content-center" [style]="color()">
+    <span style="font-size: larger; display: inline-block; text-align: center; padding: 20%;">{{quote()}}</span>
   </div>
-  
+  <div class="col-2 d-flex flex-column align-items-center justify-content-center">
+    <button *ngIf="isVisible()" [disabled]="!isEnabled()" (click)="getQuote()" class="btn btn-outline-secondary m-1">
+      <span class="material-icons">refresh</span>
+    </button>
+    <button *ngIf="isVisible()" [disabled]="!isEnabled()" (click)="downloadQuote()" class="btn btn-outline-secondary m-1">
+      <span class="material-icons">download</span>
+    </button>
+  </div>
+</div>
